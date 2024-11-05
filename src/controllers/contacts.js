@@ -21,6 +21,7 @@ export const getContactsController = async (req, res) => {
     sortBy,
     sortOrder,
     filter,
+    user: req.user,
   });
 
   res.json({
@@ -47,11 +48,15 @@ export const getContactByIdController = async (req, res, next) => {
 };
 
 export const createContactController = async (req, res, next) => {
-  const { name, phoneNumber, email, isFavourite, contactType } = req.body;
+  const { name, phoneNumber, email, isFavourite, contactType, userId } =
+    req.body;
 
-  if (!name || !phoneNumber || !contactType) {
+  if (!name || !phoneNumber || !contactType || !userId) {
     next(
-      createHttpError(400, 'Required fields: name, phoneNumber, contactType'),
+      createHttpError(
+        400,
+        'Required fields: name, phoneNumber, contactType, userId!',
+      ),
     );
     return;
   }
@@ -62,6 +67,7 @@ export const createContactController = async (req, res, next) => {
     email,
     isFavourite,
     contactType,
+    userId,
   });
 
   res.status(201).json({
@@ -73,7 +79,7 @@ export const createContactController = async (req, res, next) => {
 
 export const upsertContactController = async (req, res, next) => {
   const { contactId } = req.params;
-  const { name, phoneNumber, contactType } = req.body;
+  const { name, phoneNumber, contactType, userId } = req.body;
 
   const result = await updateContact(contactId, req.body, {
     upsert: true,
@@ -85,11 +91,11 @@ export const upsertContactController = async (req, res, next) => {
   }
 
   if (result.isNew) {
-    if (!name || !phoneNumber || !contactType) {
+    if (!name || !phoneNumber || !contactType || !userId) {
       return next(
         createHttpError(
           400,
-          'Name, Phone Number, and Contact Type are required when creating a contact!',
+          'Name, Phone Number, Contact Type and User Id are required when creating a contact!',
         ),
       );
     }

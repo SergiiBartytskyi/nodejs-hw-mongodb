@@ -1,6 +1,6 @@
-import { ContactsCollection } from '../db/models/Contacts.js';
+import { ContactsCollection } from '../db/models/Contact.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
-import { SORT_ORDER } from '../constants/index.js';
+import { ROLES, SORT_ORDER } from '../constants/index.js';
 
 export const getAllContacts = async ({
   page = 1,
@@ -8,11 +8,16 @@ export const getAllContacts = async ({
   sortOrder = SORT_ORDER.ASC,
   sortBy = '_id',
   filter = {},
+  user,
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
   const contactsQuery = ContactsCollection.find();
+
+  if (user.role !== ROLES.ADMIN) {
+    contactsQuery.where('userId').equals(user._id);
+  }
 
   if (filter.type) {
     contactsQuery.where('contactType').equals(filter.type);
