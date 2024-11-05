@@ -10,13 +10,6 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 
-export const getGreetingController = async (req, res) => {
-  res.json({
-    status: 200,
-    message: 'Hello in my Contacts DB!',
-  });
-};
-
 export const getContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
