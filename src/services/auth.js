@@ -115,9 +115,7 @@ export const requestResetToken = async (email) => {
     'reset-password-email.html',
   );
 
-  const templateSource = (
-    await fs.readFile(resetPasswordTemplatePath)
-  ).toString();
+  const templateSource = await fs.readFile(resetPasswordTemplatePath, 'utf-8');
 
   const template = handlebars.compile(templateSource);
   const html = template({
@@ -139,6 +137,7 @@ export const resetPassword = async (payload) => {
   try {
     entries = jwt.verify(payload.token, env('JWT_SECRET'));
   } catch (err) {
+    console.error('Failed token:', err.message);
     throw createHttpError(401, 'Token is expired or invalid!');
   }
 
