@@ -125,7 +125,7 @@ export const upsertContactController = async (req, res, next) => {
       return next(
         createHttpError(
           400,
-          'Name, Phone Number, Contact Type and User Id are required when creating a contact!',
+          'Name, Phone Number, Contact Type are required when creating a contact!',
         ),
       );
     }

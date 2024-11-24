@@ -20,6 +20,7 @@ properties:
   email:
     description: "Contact's email"
     type: string
+    format: email
     example: 'johndoe@mail.com'
   isFavourite:
     description: 'Whether is contact a favorite'
@@ -29,6 +30,7 @@ properties:
     description: "Contact's type"
     type: string
     enum: ['work', 'home', 'personal']
+    example: 'work'
   userId:
     description: "Contact's user id"
     type: string
