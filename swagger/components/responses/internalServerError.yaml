@@ -1,0 +1,8 @@
+type: object
+allOf:
+  - $ref: '../schemas/errorResponse.yaml'
+properties:
+  error:
+    type: string
+    description: Detailed server error message
+    example: 'Database connection failed'

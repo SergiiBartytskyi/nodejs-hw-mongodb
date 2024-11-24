@@ -1,0 +1,9 @@
+type: object
+allOf:
+  - $ref: '../schemas/errorResponse.yaml'
+properties:
+  data:
+    type: object
+    description: Additional context for the error (e.g., which fields failed validation)
+    example:
+      message: 'Contact not found!'

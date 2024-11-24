@@ -1,0 +1,22 @@
+type: object
+required:
+  - status
+  - message
+properties:
+  status:
+    type: integer
+    description: HTTP status error code (e.g., 400 for client errors, 500 for server errors)
+    example: 400
+  message:
+    type: string
+    description: Error name or explanation
+    example: 'BadRequestError'
+  # data:
+  #   type: object
+  #   description: Additional error details (specific to user errors, e.g., validation issues)
+  #   example:
+  #     message: 'Invalid input data'
+  # error:
+  #   type: string
+  #   description: Detailed error message (for server errors only)
+  #   example: 'Something went wrong'
