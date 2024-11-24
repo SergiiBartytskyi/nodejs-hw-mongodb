@@ -41,26 +41,53 @@ requestBody:
             format: binary
 responses:
   '201':
-    description: Creates a contact
+    description: Creates a student
     content:
       application/json:
         schema:
-          $ref: '../../components/responses/createdResponse.yaml'
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 201
+            message:
+              type: string
+              example: Successfully created a student!
+            data:
+              type: object
+              $ref: ../../components/schemas/contact.yaml
   '400':
-    description: Bad Request - Invalid input
-    content:
-      application/json:
-        schema:
-          $ref: '../../components/responses/httpError.yaml'
+    $ref: ../../components/responses/400.yaml
   '401':
-    description: Unauthorized - Token is invalid or expired
-    content:
-      application/json:
-        schema:
-          $ref: '../../components/responses/httpError.yaml'
+    $ref: ../../components/responses/401.yaml
   '500':
-    description: Internal Server Error
-    content:
-      application/json:
-        schema:
-          $ref: '../../components/responses/internalServerError.yaml'
+    $ref: ../../components/responses/500.yaml
+
+  # '201':
+  #   description: Creates a contact
+  #   content:
+  #     application/json:
+  #       schema:
+  #         $ref: '../../components/responses/createdResponse.yaml'
+  # '400':
+  #   description: Bad Request - Invalid input
+  #   content:
+  #     application/json:
+  #       schema:
+  #         $ref: '../../components/responses/httpError.yaml'
+  # '401':
+  #   description: Unauthorized - Token is invalid or expired
+  #   content:
+  #     application/json:
+  #       schema:
+  #         $ref: '../../components/responses/httpError.yaml'
+  # '500':
+  #   description: Internal Server Error
+  #   content:
+  #     application/json:
+  #       schema:
+  #         $ref: '../../components/responses/internalServerError.yaml'
