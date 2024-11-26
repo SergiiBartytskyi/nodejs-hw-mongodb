@@ -41,27 +41,3 @@ responses:
     $ref: '../../../components/responses/404.yaml'
   '500':
     $ref: '../../../components/responses/500.yaml'
-  # '400':
-  #   description: Bad Request - Invalid input
-  #   content:
-  #     application/json:
-  #       schema:
-  #         $ref: '../../../components/responses/httpError.yaml'
-  # '401':
-  #   description: Unauthorized - Token is invalid or expired
-  #   content:
-  #     application/json:
-  #       schema:
-  #         $ref: '../../../components/responses/httpError.yaml'
-  # '404':
-  #   description: Contact not found
-  #   content:
-  #     application/json:
-  #       schema:
-  #         $ref: '../../../components/responses/httpError.yaml'
-  # '500':
-  #   description: Internal Server Error
-  #   content:
-  #     application/json:
-  #       schema:
-  #         $ref: '../../../components/responses/internalServerError.yaml'

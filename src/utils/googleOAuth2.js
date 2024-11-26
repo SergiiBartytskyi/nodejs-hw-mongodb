@@ -7,7 +7,7 @@ import { env } from './env.js';
 
 const PATH_JSON = path.resolve('google-oauth.json');
 
-const oauthConfig = JSON.parse(await readFile(PATH_JSON));
+const oauthConfig = JSON.parse(await readFile(PATH_JSON, 'utf-8'));
 
 const googleOAuthClient = new OAuth2Client({
   clientId: env('GOOGLE_AUTH_CLIENT_ID'),

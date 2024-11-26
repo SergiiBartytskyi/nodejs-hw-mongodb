@@ -93,9 +93,5 @@ responses:
                   example: true
   '401':
     $ref: '../../components/responses/401.yaml'
-  # '401':
-  #   description: Unauthorized - Token is invalid or expired
-  #   content:
-  #     application/json:
-  #       schema:
-  #         $ref: '../../components/responses/httpError.yaml'
+  '500':
+    $ref: '../../components/responses/500.yaml'

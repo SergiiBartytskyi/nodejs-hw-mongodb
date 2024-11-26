@@ -6,6 +6,7 @@ description: 'This endpoint creates a new user'
 security:
   - bearerAuth: []
 requestBody:
+  required: true
   content:
     application/json:
       schema:
