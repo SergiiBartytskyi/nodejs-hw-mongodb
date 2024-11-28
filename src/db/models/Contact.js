@@ -1,10 +1,13 @@
 import { model, Schema } from 'mongoose';
 import { handleSaveError, setUpdateSettings } from './hooks.js';
+import { typeList } from '../../constants/index.js';
 
 const contactsSchema = new Schema(
   {
     name: {
       type: String,
+      minLength: 3,
+      maxLength: 20,
       required: true,
     },
     phoneNumber: {
@@ -21,7 +24,7 @@ const contactsSchema = new Schema(
     contactType: {
       type: String,
       required: true,
-      enum: ['work', 'home', 'personal'],
+      enum: typeList,
       default: 'personal',
     },
     userId: {
