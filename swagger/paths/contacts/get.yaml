@@ -10,25 +10,30 @@ parameters:
     name: page
     schema:
       type: integer
-    example: 1
+      example: 1
+      default: 1
   - in: query
     name: perPage
     schema:
       type: integer
       example: 10
+      default: 10
     description: 'Default value - 10'
   - in: query
     name: sortBy
     schema:
       type: string
       example: 'name'
+      default: _id
     description: "All contact's fields can be mentioned. Default value - _id"
   - in: query
     name: sortOrder
     schema:
       type: string
       enum: ['asc', 'desc']
-      example: 'Default value - asc'
+      example: 'asc'
+      default: asc
+      description: 'Default value - asc'
   - in: query
     name: type
     schema:

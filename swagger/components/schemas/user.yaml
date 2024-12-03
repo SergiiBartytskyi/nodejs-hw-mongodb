@@ -4,6 +4,7 @@ required:
   - name
   - email
   - password
+  - verify
 properties:
   _id:
     description: "User's id"
@@ -22,6 +23,11 @@ properties:
     description: "User's password"
     type: string
     example: 1111
+  verify:
+    description: "User's verification"
+    type: boolean
+    default: false
+    example: false
   createdAt:
     description: 'Timestamp of when the user was created'
     type: string

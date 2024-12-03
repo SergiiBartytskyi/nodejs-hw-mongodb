@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
-import handlebars from 'handlebars';
+import Handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { UsersCollection } from '../db/models/User.js';
@@ -12,7 +12,7 @@ import {
   SMTP,
   TEMPLATES_DIR,
 } from '../constants/index.js';
-import { SessionsCollection } from '../db/models/Session.js';
+import { SessionCollection } from '../db/models/Session.js';
 import { env } from '../utils/env.js';
 import { sendEmail } from '../utils/sendMail.js';
 import {
@@ -20,46 +20,8 @@ import {
   validateCode,
 } from '../utils/googleOAuth2.js';
 
-export const registerUser = async (payload) => {
-  const user = await UsersCollection.findOne({ email: payload.email });
-  if (user) throw createHttpError(409, 'Email in use!');
-
-  const encryptedPassword = await bcrypt.hash(payload.password, 10);
-
-  return await UsersCollection.create({
-    ...payload,
-    password: encryptedPassword,
-  });
-};
-
-export const loginUser = async (payload) => {
-  const user = await UsersCollection.findOne({ email: payload.email });
-  if (!user) {
-    throw createHttpError(401, 'Email or password invalid!');
-  }
-
-  const isEqual = await bcrypt.compare(payload.password, user.password);
-  if (!isEqual) {
-    throw createHttpError(401, 'Email or password invalid!');
-  }
-
-  await SessionsCollection.deleteOne({ userId: user._id });
-
-  const accessToken = randomBytes(30).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
-
-  return await SessionsCollection.create({
-    userId: user._id,
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + THIRTY_DAYS),
-  });
-};
-
-export const logoutUser = async (sessionId) => {
-  await SessionsCollection.deleteOne({ _id: sessionId });
-};
+const appDomain = env('APP_DOMAIN');
+const jwtSecret = env('JWT_SECRET');
 
 const createSession = () => {
   const accessToken = randomBytes(30).toString('base64');
@@ -73,8 +35,90 @@ const createSession = () => {
   };
 };
 
+export const registerUser = async (payload) => {
+  const { email, password } = payload;
+
+  const user = await UsersCollection.findOne({ email });
+  if (user) throw createHttpError(409, 'Email in use!');
+
+  const encryptedPassword = await bcrypt.hash(password, 10);
+
+  const newUser = await UsersCollection.create({
+    ...payload,
+    password: encryptedPassword,
+  });
+
+  const emailTemplatePath = path.join(TEMPLATES_DIR, 'verify-email.html');
+
+  const templateSource = await fs.readFile(emailTemplatePath, 'utf-8');
+
+  const template = Handlebars.compile(templateSource);
+
+  const token = jwt.sign({ email }, jwtSecret, { expiresIn: '24h' });
+
+  const html = template({
+    link: `${appDomain}/auth/verify?token=${token}`,
+  });
+
+  const verifyEmail = {
+    from: env(SMTP.SMTP_FROM),
+    to: email,
+    subject: 'Verify email',
+    html,
+  };
+
+  await sendEmail(verifyEmail);
+
+  return newUser;
+};
+
+export const verifyUser = async (token) => {
+  try {
+    const { email } = jwt.verify(token, jwtSecret);
+    const user = await UsersCollection.findOne({ email });
+    if (!user) {
+      throw createHttpError(404, `${email} not found!`);
+    }
+
+    return await UsersCollection.findByIdAndUpdate(user._id, { verify: true });
+  } catch (error) {
+    throw createHttpError(401, error.message);
+  }
+};
+
+export const loginUser = async (payload) => {
+  const { email, password } = payload;
+
+  const user = await UsersCollection.findOne({ email });
+  if (!user) {
+    throw createHttpError(401, 'Email or password invalid!');
+  }
+
+  if (!user.verify) {
+    throw createHttpError(401, 'Email not verified!');
+  }
+
+  const isEqual = await bcrypt.compare(password, user.password);
+  if (!isEqual) {
+    throw createHttpError(401, 'Email or password invalid!');
+  }
+
+  await SessionCollection.deleteOne({ userId: user._id });
+
+  const newSession = createSession();
+
+  return await SessionCollection.create({
+    userId: user._id,
+    ...newSession,
+  });
+};
+
+export const logoutUser = async (sessionId) => {
+  await SessionCollection.deleteOne({ _id: sessionId });
+};
+
 export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
-  const session = await SessionsCollection.findOne({
+  const session = await SessionCollection.findOne({
     _id: sessionId,
     refreshToken,
   });
@@ -82,17 +126,15 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
     throw createHttpError(401, 'Session not found!');
   }
 
-  const isSessionTokenExpired =
-    new Date() > new Date(session.refreshTokenValidUntil);
-  if (isSessionTokenExpired) {
+  if (Date.now() > session.refreshTokenValidUntil) {
     throw createHttpError(401, 'Session token expired!');
   }
 
+  await SessionCollection.deleteOne({ _id: sessionId, refreshToken });
+
   const newSession = createSession();
 
-  await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
-
-  return await SessionsCollection.create({
+  return await SessionCollection.create({
     userId: session.userId,
     ...newSession,
   });
@@ -108,7 +150,7 @@ export const requestResetToken = async (email) => {
       sub: user._id,
       email,
     },
-    env('JWT_SECRET'),
+    jwtSecret,
     {
       expiresIn: '5m',
     },
@@ -121,10 +163,10 @@ export const requestResetToken = async (email) => {
 
   const templateSource = await fs.readFile(resetPasswordTemplatePath, 'utf-8');
 
-  const template = handlebars.compile(templateSource);
+  const template = Handlebars.compile(templateSource);
   const html = template({
     name: user.name,
-    link: `${env('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+    link: `${appDomain}/auth/reset-password?token=${resetToken}`,
   });
 
   await sendEmail({
@@ -179,7 +221,7 @@ export const loginOrSignupWithGoogle = async (code) => {
 
   const newSession = createSession();
 
-  return await SessionsCollection.create({
+  return await SessionCollection.create({
     userId: user._id,
     ...newSession,
   });

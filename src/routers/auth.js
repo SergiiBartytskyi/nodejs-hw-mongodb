@@ -6,6 +6,7 @@ import {
   requestResetEmailSchema,
   resetPasswordSchema,
   loginWithGoogleOAuthSchema,
+  verifyUserSchema,
 } from '../validation/auth.js';
 import {
   registerUserController,
@@ -16,6 +17,7 @@ import {
   resetPasswordController,
   getGoogleOAuthUrlController,
   loginWithGoogleController,
+  verifyUserController,
 } from '../controllers/auth.js';
 import { validateBody } from '../middlewares/validateBody.js';
 
@@ -25,6 +27,12 @@ router.post(
   '/register',
   validateBody(registerUserSchema),
   ctrlWrapper(registerUserController),
+);
+
+router.get(
+  '/verify',
+  validateBody(verifyUserSchema),
+  ctrlWrapper(verifyUserController),
 );
 
 router.post(

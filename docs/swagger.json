@@ -118,6 +118,56 @@
         }
       }
     },
+    "/auth/verify": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Verify user's email",
+        "operationId": "verifyUserEmail",
+        "description": "Confirms the user's email address using a verification token.",
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The verification token sent to the user's email."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User verified successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User verified successfully!"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "tags": [
@@ -810,16 +860,18 @@
             "in": "query",
             "name": "page",
             "schema": {
-              "type": "integer"
-            },
-            "example": 1
+              "type": "integer",
+              "example": 1,
+              "default": 1
+            }
           },
           {
             "in": "query",
             "name": "perPage",
             "schema": {
               "type": "integer",
-              "example": 10
+              "example": 10,
+              "default": 10
             },
             "description": "Default value - 10"
           },
@@ -828,7 +880,8 @@
             "name": "sortBy",
             "schema": {
               "type": "string",
-              "example": "name"
+              "example": "name",
+              "default": "_id"
             },
             "description": "All contact's fields can be mentioned. Default value - _id"
           },
@@ -841,7 +894,9 @@
                 "asc",
                 "desc"
               ],
-              "example": "Default value - asc"
+              "example": "asc",
+              "default": "asc",
+              "description": "Default value - asc"
             }
           },
           {
@@ -1067,7 +1122,8 @@
           "_id",
           "name",
           "email",
-          "password"
+          "password",
+          "verify"
         ],
         "properties": {
           "_id": {
@@ -1091,6 +1147,12 @@
             "type": "string",
             "example": 1111
           },
+          "verify": {
+            "description": "User's verification",
+            "type": "boolean",
+            "default": false,
+            "example": false
+          },
           "createdAt": {
             "description": "Timestamp of when the user was created",
             "type": "string",
@@ -1111,7 +1173,8 @@
           "_id",
           "name",
           "phoneNumber",
-          "contactType"
+          "contactType",
+          "userId"
         ],
         "properties": {
           "_id": {
