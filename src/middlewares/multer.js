@@ -3,9 +3,6 @@ import createHttpError from 'http-errors';
 import { TEMP_UPLOAD_DIR } from '../constants/index.js';
 
 const storage = multer.diskStorage({
-  // destination: function (req, file, cb) {
-  //   cb(null, TEMP_UPLOAD_DIR);
-  // }, or ->
   destination: TEMP_UPLOAD_DIR,
   filename: function (req, file, cb) {
     const uniquePrefix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
@@ -22,8 +19,10 @@ const fileFilter = (req, file, cb) => {
   const extension = file.originalname.split('.').pop();
 
   if (extension === 'exe') {
-    return cb(createHttpError(400, '.exe extension not allow!'));
+    return cb(createHttpError(400, '.exe extension not allow!'), false);
   }
+
+  cb(null, true);
 };
 
 export const upload = multer({
