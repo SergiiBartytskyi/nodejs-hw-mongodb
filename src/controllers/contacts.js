@@ -56,11 +56,11 @@ export const createContactController = async (req, res, next) => {
   const userId = req.user._id;
   const photo = req.file;
 
-  let photoUrl;
+  let photoUrl = null;
 
   if (photo) {
     if (env('ENABLE_CLOUDINARY') === 'true') {
-      photoUrl = await saveFileToCloudinary(photo);
+      photoUrl = await saveFileToCloudinary(photo, 'contacts');
     } else {
       photoUrl = await saveFileToUploadDir(photo);
     }
@@ -95,7 +95,7 @@ export const upsertContactController = async (req, res, next) => {
   const { name, phoneNumber, contactType } = req.body;
   const photo = req.file;
 
-  let photoUrl;
+  let photoUrl = null;
 
   if (photo) {
     if (env('ENABLE_CLOUDINARY') === 'true') {
@@ -146,7 +146,7 @@ export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
   const userId = req.user._id;
   const photo = req.file;
-  let photoUrl;
+  let photoUrl = null;
 
   if (photo) {
     if (env('ENABLE_CLOUDINARY') === 'true') {
